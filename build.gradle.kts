@@ -31,6 +31,14 @@ dependencies {
     annotationProcessor("org.projectlombok:lombok")
     testImplementation("org.springframework.boot:spring-boot-starter-test")
     testRuntimeOnly("org.junit.platform:junit-platform-launcher")
+
+    implementation("org.springframework.boot:spring-boot-starter-data-jpa")
+    runtimeOnly("com.h2database:h2")
+
+    implementation("org.liquibase:liquibase-core")
+
+    implementation("org.postgresql:postgresql:42.7.5")
+
 }
 
 

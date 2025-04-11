@@ -1,5 +1,6 @@
 package ru.tbank.fdsspring.controller;
 
+import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -11,27 +12,21 @@ import ru.tbank.fdsspring.service.CurrencyService;
 import java.util.UUID;
 
 @RestController
+@RequiredArgsConstructor
 @RequestMapping("/api/currencies")
 public class CurrencyController {
 
-    @Autowired
-    private CurrencyService currencyService;
+    final private CurrencyService currencyService;
 
     @GetMapping
     public ResponseEntity<?> getCurrencies() {
-        return new ResponseEntity<>(currencyService.getCurrencies(), HttpStatus.OK);
+        return ResponseEntity.ok(currencyService.getAllCurrencies());
     }
 
     @PostMapping
     public ResponseEntity<?> postCurrencies(@RequestBody CurrencyRequest currencyRequest) {
-        Currency currency = new Currency();
-        currency.setId(UUID.randomUUID().toString());
-        currency.setName(currencyRequest.getName());
-        currency.setBaseCurrency(currencyRequest.getBaseCurrency());
-        currency.setPriceChangeRate(currencyRequest.getPriceChangeRange());
-        currency.setDescription(currencyRequest.getDescription());
 
-        if (currencyService.addCurrency(currency)) {
+        if (currencyService.addCurrency(currencyRequest)) {
             return ResponseEntity.ok("OK");
         } else {
             return ResponseEntity.badRequest().build();
@@ -40,11 +35,8 @@ public class CurrencyController {
     }
 
     @GetMapping("/{id}")
-    public ResponseEntity<?> getCurrenciesById(@PathVariable String id) {
-        Currency currency = currencyService.getCurrencies().stream()
-                .filter(c -> c.getId().equals(id))
-                .findFirst()
-                .orElse(null);
+    public ResponseEntity<?> getCurrenciesById(@PathVariable Long id) {
+        Currency currency = currencyService.getCurrency(id);
 
         if (currency == null) {
             return ResponseEntity.notFound().build();
@@ -54,37 +46,20 @@ public class CurrencyController {
     }
 
     @PutMapping("/{id}")
-    public ResponseEntity<?> postCurrenciesById(@PathVariable String id,
+    public ResponseEntity<?> postCurrenciesById(@PathVariable Long id,
                                                 @RequestBody CurrencyRequest currencyRequest) {
-        Currency currency = currencyService.getCurrencies().stream()
-                .filter(c -> c.getId().equals(id))
-                .findFirst()
-                .orElse(null);
 
-        if (currency == null) {
-            return ResponseEntity.notFound().build();
-        }
-
-        currency.setName(currencyRequest.getName());
-        currency.setBaseCurrency(currencyRequest.getBaseCurrency());
-        currency.setPriceChangeRate(currencyRequest.getPriceChangeRange());
-        currency.setDescription(currencyRequest.getDescription());
-
-        if (!currencyService.deleteCurrency(id)) {
-            return ResponseEntity.badRequest().build();
-        };
-
-        if (currencyService.addCurrency(currency)) {
+        if (currencyService.updateCurrency(currencyRequest, id)) {
             return ResponseEntity.ok("OK");
         } else {
-            return ResponseEntity.badRequest().build();
+            return ResponseEntity.notFound().build();
         }
     }
 
     @DeleteMapping("/{id}")
-    public ResponseEntity<?> deleteCurrenciesById(@PathVariable String id) {
-        boolean isDeleted = currencyService.deleteCurrency(id);
-        if (isDeleted) {
+    public ResponseEntity<?> deleteCurrenciesById(@PathVariable Long id) {
+
+        if (currencyService.deleteCurrency(id)) {
             return ResponseEntity.ok("OK");
         } else {
             return ResponseEntity.notFound().build();
