@@ -4,4 +4,14 @@ server:
 spring:
   application:
     name: FDS-Spring
-
+  datasource:
+    url: jdbc:postgresql://user-db:5432/currency_tracker
+    username: user
+    password: password
+    driver-class-name: org.postgresql.Driver
+  jpa:
+    hibernate:
+      ddl-auto: none
+    show-sql: true
+  liquibase:
+    change-log: classpath:db/changelog/db.changelog-master.sql
